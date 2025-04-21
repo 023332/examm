@@ -1,23 +1,21 @@
 import express from 'express';
-import userController  from '../controllers/userController';
-import { validateUser } from '../middlewares/validate';
-import { authenticate } from '../middlewares/auth';
+import { uploadProfilePicture } from '../middlewares/uploadMiddleware.js';
+import { authenticateUser } from '../middlewares/authMiddleware.js';
+import {
+  getUserProfile,
+  updateUserProfile,
+  uploadProfilePicture as uploadPicture,
+} from '../controllers/userController.js';
 
 const router = express.Router();
 
-// Route for user registration
-router.post('/register', validateUser, userController.registerUser);
+// Get user profile
+router.get('/:userId', authenticateUser, getUserProfile);
 
-// Route for user login
-router.post('/login', userController.loginUser);
+// Update user profile
+router.put('/:userId', authenticateUser, updateUserProfile);
 
-// Route for getting user profile
-router.get('/profile', authenticate, userController.getUserProfile);
+// Upload profile picture
+router.post('/:userId/profile-picture', authenticateUser, uploadProfilePicture, uploadPicture);
 
-// Route for updating user profile
-router.put('/profile', authenticate, validateUser, userController.updateUserProfile);
-
-// Route for deleting user account
-router.delete('/profile', authenticate, userController.deleteUserAccount);
-
-module.exports = router;
+export default router;

@@ -1,34 +1,46 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import path  from 'path';
-import userRoutes from './routes/userRoutes';
-import postRoutes  from './routes/postRoutes';
-import { errorHandler }  from './middlewares/validate';
-require('dotenv').config();
+import express  from 'express';
+import bodyParser  from 'body-parser';
+import cors  from 'cors';
+import { db }  from './utils/db';
+import errorHandler from './middlewares/errorHandler';
+import authRoutes  from './routes/authRoutes';
+import userRoutes  from './routes/userRoutes';
+import bookRoutes  from './routes/bookRoutes';
+import categoryRoutes  from './routes/categoryRoutes';
+import commentRoutes  from './routes/commentRoutes';
+import favoriteRoutes  from './routes/favoriteRoutes';
+import adminRoutes  from './routes/adminRoutes';
 
 const app = express();
 
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use("/api/posts", postRoutes);
 
-// Error handling
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/books', bookRoutes);
+app.use('/categories', categoryRoutes);
+app.use('/reviews', commentRoutes);
+app.use('/favorites', favoriteRoutes);
+app.use('/admin', adminRoutes);
+
+
 app.use(errorHandler);
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
+
+db.authenticate()
+  .then(() => {
+    console.log('Database connected successfully');
+  })
+  .catch(err => {
+    console.error('Database connection failed:', err);
+  });
+
 
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
-
-export default app;
